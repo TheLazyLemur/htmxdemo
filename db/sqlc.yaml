@@ -1,0 +1,11 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "query.sql"
+    schema: "schema.sql"
+    gen:
+      go:
+        package: "queries"
+        out: "queries"
+        emit_interface: true
+        emit_methods_with_db_argument: true

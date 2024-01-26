@@ -1,0 +1,99 @@
+package components
+
+import (
+	"htmxdemo/types"
+	"strings"
+	"fmt"
+)
+
+templ TransactionsTable(transactions []types.Transaction) {
+	<h1 class="text-2xl font-bold mb-6">Bank Transactions</h1>
+	<input
+		class="w-full border border-gray-300 rounded p-2 mb-6 outline-none focus:border-blue-500"
+		type="search"
+		name="search"
+		placeholder="Search..."
+		hx-post="hx/transactions/search"
+		hx-trigger="input chnaged delay:500ms, search"
+		hx-target="#transactionsTableBody"
+		hx-swap="innerHTML"
+	/>
+	<table class="min-w-full border border-gray-300">
+		<thead>
+			<tr class="bg-gray-100">
+				@TransactionTableHeader("Transaction ID")
+				@TransactionTableHeader("From Account")
+				@TransactionTableHeader("To Account")
+				@TransactionTableHeader("Amount")
+				@TransactionTableHeader("Actions")
+			</tr>
+		</thead>
+		<tbody id="transactionsTableBody">
+			@TransactionsTableBody(transactions)
+		</tbody>
+	</table>
+}
+
+templ TransactionTableHeader(header string) {
+	<th class="py-2 px-4 border-b text-left">{header}</th>
+}
+
+templ TransactionsTableBody(transactions []types.Transaction) {
+	for _, t := range transactions {
+		@TransactionsTableRow(t)
+	}
+}
+
+templ TransactionsTableRow(t types.Transaction) {
+	<tr class={ getBgColor(t) } id={ fmt.Sprintf("t%d", t.ID) }>
+		<td class="py-2 px-4 border-b text-left">{ fmt.Sprintf("%d", t.ID) }</td>
+		<td class="py-2 px-4 border-b text-left">{ fmt.Sprintf("%d", t.From) }</td>
+		<td class="py-2 px-4 border-b text-left">{ fmt.Sprintf("%d", t.To) }</td>
+		<td class={ "py-2 px-4 border-b " + getColor(fmt.Sprintf("%d", t.Amount)) }>{ fmt.Sprintf("%d", t.Amount) }</td>
+		<td class="py-2 px-4 border-b text-left">
+			if t.Flagged {
+				<button hx-swap="outerHTML" hx-target={ fmt.Sprintf("#t%d", t.ID) } hx-put={ fmt.Sprintf("/hx/transactions?id=%d", t.ID) }>
+					@safe()
+				</button>
+			} else {
+				<button hx-swap="outerHTML" hx-target={ fmt.Sprintf("#t%d", t.ID) } hx-put={ fmt.Sprintf("/hx/transactions?id=%d", t.ID) }>
+					@flag()
+				</button>
+			}
+		</td>
+	</tr>
+}
+
+func getColor(amount string) string {
+	color := "text-green-500"
+
+	if strings.HasPrefix(amount, "-") {
+		color = "text-red-500"
+	}
+
+	return color
+}
+
+func getBgColor(t types.Transaction) string {
+	if t.Flagged {
+		return "bg-red-100"
+	}
+
+	return ""
+}
+
+templ flag() {
+	<div class="h-5 w-5 fill-current hover:cursor-pointer text-red-500">
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5"></path>
+		</svg>
+	</div>
+}
+
+templ safe() {
+	<div class="h-5 w-5 hover:cursor-pointer text-green-500">
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+			<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"></path>
+		</svg>
+	</div>
+}

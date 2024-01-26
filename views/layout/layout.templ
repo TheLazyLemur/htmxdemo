@@ -1,0 +1,45 @@
+package layout
+
+import "htmxdemo/types"
+
+func getClasses(ctx context.Context, path string) string {
+	if path == ctx.Value(types.MyRouteKey).(string) {
+		return "text-blue-500"
+	}
+
+	return "text-gray-500"
+}
+
+templ getNav() {
+	if  ctx.Value(types.MyDataKey).(bool) {
+		<div class="max-w-4xl mx-auto bg-white p-8 rounded shadow">
+			<a class={ getClasses(ctx, "/") } href="/">Home</a> | <a class={ getClasses(ctx, "/transactions") } href="/transactions">Transactions</a>
+		</div>
+	} else {
+		<div class="max-w-4xl mx-auto bg-white p-8 rounded shadow">
+			<a href="/login">Login</a>
+		</div>
+	}
+}
+
+templ Layout(ctx context.Context) {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+		</head>
+		<body hx-boost="true" onload={ ConfigHTMX() }>
+			@getNav()
+			if  ctx.Value(types.MyDataKey).(bool) {
+				{ children... }
+			}
+		</body>
+	</html>
+}
+
+script ConfigHTMX() {
+	document.body.addEventListener('htmx:configRequest', function(evt) {
+		evt.detail.headers['Authorization'] = "Bearer <token>";
+	});
+}

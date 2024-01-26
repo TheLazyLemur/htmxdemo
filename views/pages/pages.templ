@@ -1,0 +1,21 @@
+package pages
+
+import "htmxdemo/views/layout"
+import "htmxdemo/views/components"
+import "htmxdemo/types"
+
+templ Home() {
+	@layout.Layout(ctx) {
+		<div class="max-w-4xl mx-auto bg-white p-8 rounded shadow">
+			<h1 class="text-2xl font-bold mb-6">Home</h1>
+		</div>
+	}
+}
+
+templ Transactions(transactions []types.Transaction) {
+	@layout.Layout(ctx) {
+		<div class="max-w-4xl mx-auto bg-white p-8 rounded shadow">
+			@components.TransactionsTable(transactions)
+		</div>
+	}
+}
